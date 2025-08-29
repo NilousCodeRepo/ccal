@@ -1,4 +1,4 @@
-## A text based terminal made in C
+## A text based caledar made in C
 
 ### what will do is:
 - [x] Visualize month + day of the month in a schematized way

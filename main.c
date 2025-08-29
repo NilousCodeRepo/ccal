@@ -23,9 +23,7 @@ int main(int argc, char* argv[])
 		{
 			switch(options)
 			{
-				case 'h': printf("-a: current time\n-b: calculate next date\n");
-				break;
-				case 'a': printf("%s\n",ctime_r(&timep,buf));
+				case 'h': printf("-b: calculate next date\n");
 				break;
 
 				case 'b':
@@ -37,16 +35,7 @@ int main(int argc, char* argv[])
 					next_time(d,m,y);
 				}
 				break;
-
-				case 'i':
-				{
-					time_t d,m,y;
-
-					printf("insert date to mark as important:\n");
-					scanf("%d%d%d",&d,&m,&y);
-					important_date(d,m,y);
-				}
-				break;
+				
 				default:
 				     printf("?? getopt returned character code 0%o ??\n",options);
 			}
@@ -106,7 +95,7 @@ void current_date()
 
     // Print the month and year
     strftime(date_str, sizeof(date_str), "%B %Y", tm);
-    printf("%s\n", date_str);
+    printf("     %s\n", date_str);
     printf("Su Mo Tu We Th Fr Sa\n");
 
     // Print the calendar
@@ -115,7 +104,7 @@ void current_date()
     }
     for (i = 1; i <= days_in_month; i++) {
         if (i == day) {
-            printf("|%2d|", i);
+            printf(" |%2d|", i);
         } else {
             printf("%3d", i);
         }
@@ -125,19 +114,4 @@ void current_date()
     }
 }
 
-time_t important_date(time_t day, time_t month, time_t year)//TODO: Read saved file at program start and put asterisk on specified date
-{
-	time_t imp;
-	struct tm *tm;
-	imp = time(0);
 
-	if ((tm = localtime (&imp)) == NULL) {
-	    printf ("Error extracting time stuff\n");
-	    return 1;
- 	}
-
-	FILE *save = fopen("save.txt","a");
-	fprintf(save, "%04d-%02d-%02d\n", tm->tm_year+1900+year, tm->tm_mon+1+month, tm->tm_mday + day);
-
-	fclose(save);
-}

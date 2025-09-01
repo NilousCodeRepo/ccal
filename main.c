@@ -1,4 +1,3 @@
-//TODO: insert * in important dates, go to github to check is 
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>//for getopts. There will not be --args in cmd
@@ -126,10 +125,6 @@ void current_date()
             printf("\n");
         }
     }
-	
-//TODO: read file with fscanf and check dates
-//FILE *mark = fopen("save.txt", "r");
-	
 }
 
 FILE important_date(time_t day, time_t month, time_t year)

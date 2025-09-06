@@ -1,114 +1,119 @@
+//TODO: error checking
 #include <stdio.h>
 #include <time.h>
-#include <unistd.h>//for getopts. There will not be --args in cmd
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 
-time_t next_time(time_t day, time_t month, time_t year);
-void current_date();
-FILE important_date(time_t day, time_t month, time_t year);
+#define __USE_XOPEN//for strptime()
+/*
+void important_date()
+{}
+*/
 
-int main(int argc, char* argv[])
+void current_date()
 {
-	int options;
+	struct tm *tm;
+	time_t cdate, day, month, year, days_in_month, start_day;
+	char date_str[64];
+
+	time(&cdate);//initialize time in secs in cdate
+	tm = localtime(&cdate);
+
+	day = tm->tm_mday;//days in month[1-31]
+	start_day = tm->tm_wday;//days in week [1-7]
+	month = tm->tm_mon + 1;
+	year = tm->tm_year + 1900;
+
+	// Determine the number of days in the current month
+	if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8
+			|| month == 10 || month == 12) 
+	{
+		days_in_month = 31;
+	}
+	else if (month == 4 || month == 6 || month == 9 || month == 11) 
+	{
+		days_in_month = 30;
+	}
+	else 
+	{
+		days_in_month = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0))
+			? 29 : 28;
+	}
+
+	// Print the month and year
+	strftime(date_str, sizeof(date_str), "%B %Y", tm);
+	printf("     %s\n", date_str);
+	printf("Su Mo Tu We Th Fr Sa\n");
+
+	// Print the calendar
+	for (int i = 0; i < start_day; i++) 
+	{
+		printf("   ");
+	}
+
+	for (int i = 1; i <= days_in_month; i++) 
+	{
+		if (i == day) 
+		{
+			printf(" |%2d|", i);
+		}
+		else 
+		{
+			printf("%3d", i);
+		}
+		if ((i + start_day) % 7 == 0 || i == days_in_month) 
+		{
+			printf("\n");
+		}
+	}
+
+}
+
+void next_date(time_t day, time_t month, time_t year)
+{
+	struct tm *tm;
+	time_t ndate;
+
+	time(&ndate);
+	tm = localtime(&ndate);
+	printf ("the next date will be: %04d-%02d-%02d\n",	tm->tm_year+1900 + year,
+																										 	tm->tm_mon+1 + month,
+																											tm->tm_mday + day);
+}
+
+int main(int argc, char** argv)
+{
+	int opt;
 	time_t tloc;
 	const time_t timep = time(&tloc);
-	char buf[26];
 
-	//use a while for more options at the same time
-	if((options = getopt(argc, argv, "bh")) != -1)
+	if((opt = getopt(argc, argv,"bih")) != -1)
 	{
+		switch(opt)
 		{
-			switch(options)
+			case 'h': printf("-b: calculate next date\n-i: mark date as important\n");
+			break;
+			case 'b':
+			break;
+			case 'i':
 			{
-				case 'h': printf("-b: calculate next date\n");
-				break;
-
-				case 'b':
-				{
-					time_t d,m,y;
-
-					printf("enter d/m/y to calculate:\n",d,m,y);
-					scanf("%d%d%d",&d,&m,&y);
-					next_time(d,m,y);
-				}
-				break;
-				
-				default:
-				printf("?? getopt returned character code 0%o ??\n",options);
+				time_t d,m,y;
+		
+				printf("insert date to calculate:\n");
+				scanf("%d%d%d",&d,&m,&y);
+		
+				next_dete(d,m,y);
 			}
+			break;	
 		}
 	}
 	else
 	{
 		current_date();
 	}
-
+	
 	return 0;
 }
 
-time_t  next_time(time_t day, time_t month, time_t year)
-{
-    time_t now;
-    struct tm *tm;
 
-    now = time(0);
-    if ((tm = localtime (&now)) == NULL) {
-        printf ("Error extracting time stuff\n");
-        return 1;
-    }
-
-    printf ("%04d-%02d-%02d\n",
-        tm->tm_year+1900+year, tm->tm_mon+1+month, tm->tm_mday + day);
-}
-
-void current_date()
-{
-    time_t tloc;
-    struct tm *tm;
-    char date_str[50];
-    int day, month, year, days_in_month, start_day, i, j;
-
-    time(&tloc);
-    tm = localtime(&tloc);
-
-    if (tm == NULL) {
-        printf("Error extracting time information\n");
-        return;
-    }
-
-		 day = tm->tm_mday;
-		 month = tm->tm_mon + 1;
-		 year = tm->tm_year + 1900;
-		 start_day = tm->tm_wday;
-    // Determine the number of days in the current month
-    if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 
-				|| month == 10 || month == 12) {
-        days_in_month = 31;
-    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
-        days_in_month = 30;
-    } else {
-        days_in_month = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) 
-				? 29 : 28;
-    }
-
-    // Print the month and year
-    strftime(date_str, sizeof(date_str), "%B %Y", tm);
-    printf("     %s\n", date_str);
-    printf("Su Mo Tu We Th Fr Sa\n");
-
-    // Print the calendar
-    for (i = 0; i < start_day; i++) {
-        printf("   ");
-    }
-    for (i = 1; i <= days_in_month; i++) {
-        if (i == day) {
-            printf(" |%2d|", i);
-        } else {
-            printf("%3d", i);
-        }
-        if ((i + start_day) % 7 == 0 || i == days_in_month) {
-            printf("\n");
-        }
-    }
-}

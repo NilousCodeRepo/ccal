@@ -1,21 +1,63 @@
 //TODO: error checking
+
 #include <stdio.h>
+#define __USE_XOPEN//for strptime()
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define __USE_XOPEN//for strptime()
-/*
-void important_date()
-{}
-*/
+
+void print_cal();
+
+char* important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
+{
+	struct tm *tm;
+	time_t imp_date;
+	char buf[64];
+
+	FILE *fptr;
+	fptr = fopen("save.txt", "w+");
+
+	time(&imp_date);
+	tm = localtime(&imp_date);	
+
+	tm->tm_mday = imp_day;
+	tm->tm_mon = imp_mon - 1; 
+	tm->tm_year = imp_year - 1900;
+	strftime(buf, sizeof(buf), "%B %d %Y", tm);
+	//TODO: write to file the results of strftime
+	fprintf(fptr, "%s\n", buf);
+	
+ return buf;
+
+}
 
 void current_date()
+{
+	print_cal();
+}
+
+void next_date(time_t day, time_t month, time_t year)
+{
+	struct tm *tm;
+	time_t ndate;
+
+	time(&ndate);
+	tm = localtime(&ndate);
+	printf ("the next date will be: %04d-%02d-%02d\n",	tm->tm_year+1900 + year,
+																										 	tm->tm_mon+1 + month,
+																											tm->tm_mday + day);
+}
+
+void print_cal()
 {
 	struct tm *tm;
 	time_t cdate, day, month, year, days_in_month, start_day;
 	char date_str[64];
+
+	FILE *fptr;
+	fptr = fopen("save.txt", "r");//file to read only save.txt
 
 	time(&cdate);//initialize time in secs in cdate
 	tm = localtime(&cdate);
@@ -46,40 +88,55 @@ void current_date()
 	printf("     %s\n", date_str);
 	printf("Su Mo Tu We Th Fr Sa\n");
 
-	// Print the calendar
-	for (int i = 0; i < start_day; i++) 
+//TODO: transfer the output of important date to a file and read it with strptime and compare here
+	if(*strptime(important_date(day,month,year),"%B %d %Y", tm) == 
+		strftime(date_str, sizeof(date_str), "%B %d %Y", tm))
 	{
-		printf("   ");
-	}
+		// Print the calendar
+		for (int i = 0; i < start_day; i++) 
+		{
+			printf("  *");
+		}
 
-	for (int i = 1; i <= days_in_month; i++) 
+		for (int i = 1; i <= days_in_month; i++) 
+		{
+			if (i == day) 
+			{
+				printf(" |%2d|", i);
+			}
+			else 
+			{
+				printf("%3d", i);
+			}
+			if ((i + start_day) % 7 == 0 || i == days_in_month) 
+			{
+				printf("\n");
+			}
+		}
+	}
+	else
 	{
-		if (i == day) 
+		for (int i = 0; i < start_day; i++) 
 		{
-			printf(" |%2d|", i);
+			printf("   ");
 		}
-		else 
+
+		for (int i = 1; i <= days_in_month; i++) 
 		{
-			printf("%3d", i);
-		}
-		if ((i + start_day) % 7 == 0 || i == days_in_month) 
-		{
-			printf("\n");
+			if (i == day) 
+			{
+				printf(" |%2d|", i);
+			}
+			else 
+			{
+				printf("%3d", i);
+			}
+			if ((i + start_day) % 7 == 0 || i == days_in_month) 
+			{
+				printf("\n");
+			}
 		}
 	}
-
-}
-
-void next_date(time_t day, time_t month, time_t year)
-{
-	struct tm *tm;
-	time_t ndate;
-
-	time(&ndate);
-	tm = localtime(&ndate);
-	printf ("the next date will be: %04d-%02d-%02d\n",	tm->tm_year+1900 + year,
-																										 	tm->tm_mon+1 + month,
-																											tm->tm_mday + day);
 }
 
 int main(int argc, char** argv)
@@ -94,16 +151,24 @@ int main(int argc, char** argv)
 		{
 			case 'h': printf("-b: calculate next date\n-i: mark date as important\n");
 			break;
-			case 'b':
-			break;
 			case 'i':
+			{
+				time_t d,m,y;
+	
+				printf("insert reminder:\n");
+				scanf("%d%d%d",&d,&m,&y);
+
+				important_date(d,m,y);
+			}
+			break;
+			case 'b':
 			{
 				time_t d,m,y;
 		
 				printf("insert date to calculate:\n");
 				scanf("%d%d%d",&d,&m,&y);
 		
-				next_dete(d,m,y);
+				next_date(d,m,y);
 			}
 			break;	
 		}

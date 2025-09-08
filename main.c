@@ -56,9 +56,6 @@ void print_cal()
 	time_t cdate, day, month, year, days_in_month, start_day;
 	char date_str[64];
 
-	FILE *fptr;
-	fptr = fopen("save.txt", "r");//file to read only save.txt
-
 	time(&cdate);//initialize time in secs in cdate
 	tm = localtime(&cdate);
 
@@ -89,7 +86,8 @@ void print_cal()
 	printf("Su Mo Tu We Th Fr Sa\n");
 
 //TODO: transfer the output of important date to a file and read it with strptime and compare here
-	if(*strptime(important_date(day,month,year),"%B %d %Y", tm) == 
+#if 0
+if(*strptime(important_date(day,month,year),"%B %d %Y", tm) == 
 		strftime(date_str, sizeof(date_str), "%B %d %Y", tm))
 	{
 		// Print the calendar
@@ -115,7 +113,8 @@ void print_cal()
 		}
 	}
 	else
-	{
+	{ 
+#endif
 		for (int i = 0; i < start_day; i++) 
 		{
 			printf("   ");
@@ -137,7 +136,6 @@ void print_cal()
 			}
 		}
 	}
-}
 
 int main(int argc, char** argv)
 {

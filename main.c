@@ -1,14 +1,10 @@
-//TODO: error checking
-
 #include <stdio.h>
 #define __USE_XOPEN//for strptime()
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-
-
-void print_cal();
+#include <stdio.h>
 
 void important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
 {
@@ -18,6 +14,8 @@ void important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
 
 	FILE *fptr;
 	fptr = fopen("save.txt", "w+");
+	if(fptr == NULL)
+		perror("ERROR: important_date() could not create save file\n");
 
 	time(&imp_date);
 	tm = localtime(&imp_date);	
@@ -32,11 +30,6 @@ void important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
 	fclose(fptr);
 }
 
-void current_date()
-{
-	print_cal();
-}
-
 void next_date(time_t day, time_t month, time_t year)
 {
 	struct tm *tm;
@@ -49,7 +42,7 @@ void next_date(time_t day, time_t month, time_t year)
 																											tm->tm_mday + day);
 }
 
-void print_cal()
+void current_date()
 {
 	struct tm *tm; 
 	struct tm *imp_date;
@@ -84,11 +77,13 @@ void print_cal()
 	FILE *fptr;
 	fptr = fopen("save.txt", "r");
 	
+	if(fptr == NULL)
+		perror("ERROR: current_date() could not create file\n");
+
 	// Print the month and year
 	strftime(date_str, sizeof(date_str), "%B %Y", tm);
 	printf("     %s\n", date_str);
 	printf("Su Mo Tu We Th Fr Sa\n");
-	
 
 	if(fptr != NULL)
 	{
@@ -107,7 +102,7 @@ void print_cal()
 
 			for (int i = 1; i <= days_in_month; i++) 
 			{
-				if (i == imp_date->tm_mday)//TODO: make so that the * is on the right day 
+				if (i == imp_date->tm_mday)
 				{
 					printf(" *%2d", i);
 				}
@@ -195,5 +190,3 @@ int main(int argc, char** argv)
 	
 	return 0;
 }
-
-

@@ -10,7 +10,7 @@
 
 void print_cal();
 
-char* important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
+void important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
 {
 	struct tm *tm;
 	time_t imp_date;
@@ -29,8 +29,7 @@ char* important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
 	//TODO: write to file the results of strftime
 	fprintf(fptr, "%s\n", buf);
 	
- return buf;
-
+	fclose(fptr);
 }
 
 void current_date()
@@ -52,12 +51,16 @@ void next_date(time_t day, time_t month, time_t year)
 
 void print_cal()
 {
-	struct tm *tm;
+	struct tm *tm, *imp_date;
 	time_t cdate, day, month, year, days_in_month, start_day;
 	char date_str[64];
 
+	FILE *fptr;
+	fptr = fopen("save.txt", "r");
+
 	time(&cdate);//initialize time in secs in cdate
 	tm = localtime(&cdate);
+	imp_date = localtime(&cdate);
 
 	day = tm->tm_mday;//days in month[1-31]
 	start_day = tm->tm_wday;//days in week [1-7]
@@ -85,9 +88,10 @@ void print_cal()
 	printf("     %s\n", date_str);
 	printf("Su Mo Tu We Th Fr Sa\n");
 
-//TODO: transfer the output of important date to a file and read it with strptime and compare here
-#if 0
-if(*strptime(important_date(day,month,year),"%B %d %Y", tm) == 
+if(fptr != NULL)
+{
+	//TODO: broken comparison
+	if(fscanf(fptr, "%ld-%ld-%ld\n")== 
 		strftime(date_str, sizeof(date_str), "%B %d %Y", tm))
 	{
 		// Print the calendar
@@ -112,9 +116,11 @@ if(*strptime(important_date(day,month,year),"%B %d %Y", tm) ==
 			}
 		}
 	}
+
+	fclose(fptr);
+}
 	else
 	{ 
-#endif
 		for (int i = 0; i < start_day; i++) 
 		{
 			printf("   ");
@@ -136,6 +142,8 @@ if(*strptime(important_date(day,month,year),"%B %d %Y", tm) ==
 			}
 		}
 	}
+
+}
 
 int main(int argc, char** argv)
 {

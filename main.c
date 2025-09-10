@@ -26,7 +26,7 @@ void important_date(time_t imp_day, time_t imp_mon, time_t imp_year)
 	tm->tm_mon = imp_mon - 1; 
 	tm->tm_year = imp_year - 1900;
 	strftime(buf, sizeof(buf), "%B %d %Y", tm);
-	//TODO: write to file the results of strftime
+	
 	fprintf(fptr, "%s\n", buf);
 	
 	fclose(fptr);
@@ -51,12 +51,10 @@ void next_date(time_t day, time_t month, time_t year)
 
 void print_cal()
 {
-	struct tm *tm, *imp_date;
+	struct tm *tm; 
+	struct tm *imp_date;
 	time_t cdate, day, month, year, days_in_month, start_day;
 	char date_str[64];
-
-	FILE *fptr;
-	fptr = fopen("save.txt", "r");
 
 	time(&cdate);//initialize time in secs in cdate
 	tm = localtime(&cdate);
@@ -83,42 +81,54 @@ void print_cal()
 			? 29 : 28;
 	}
 
+	FILE *fptr;
+	fptr = fopen("save.txt", "r");
+	
 	// Print the month and year
 	strftime(date_str, sizeof(date_str), "%B %Y", tm);
 	printf("     %s\n", date_str);
 	printf("Su Mo Tu We Th Fr Sa\n");
+	
 
-if(fptr != NULL)
-{
-	//TODO: broken comparison
-	if(fscanf(fptr, "%ld-%ld-%ld\n")== 
-		strftime(date_str, sizeof(date_str), "%B %d %Y", tm))
+	if(fptr != NULL)
 	{
-		// Print the calendar
-		for (int i = 0; i < start_day; i++) 
-		{
-			printf("  *");
-		}
+		char buf[64];
 
-		for (int i = 1; i <= days_in_month; i++) 
+		fread(buf, 64, 1, fptr);
+		strptime(buf, "%B %d %Y", imp_date);
+
+		if(tm == imp_date) 
 		{
-			if (i == day) 
+			// Print the calendar
+			for (int i = 0; i < start_day; i++) 
 			{
-				printf(" |%2d|", i);
+				printf("   ");
 			}
-			else 
+
+			for (int i = 1; i <= days_in_month; i++) 
 			{
-				printf("%3d", i);
+				if (i == imp_date->tm_mday)//TODO: make so that the * is on the right day 
+				{
+					printf(" *%2d", i);
+				}
+				else if(i == day)
+				{
+					printf(" |%2d|",i);
+				}
+				else 
+				{
+					printf("%3d", i);
+				}
+
+				if ((i + start_day) % 7 == 0 || i == days_in_month) 
+				{
+					printf("\n");
+				}
 			}
-			if ((i + start_day) % 7 == 0 || i == days_in_month) 
-			{
-				printf("\n");
-			}
+
+			fclose(fptr);
 		}
 	}
-
-	fclose(fptr);
-}
 	else
 	{ 
 		for (int i = 0; i < start_day; i++) 
@@ -142,7 +152,6 @@ if(fptr != NULL)
 			}
 		}
 	}
-
 }
 
 int main(int argc, char** argv)
